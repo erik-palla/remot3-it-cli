@@ -72,10 +72,18 @@ const askForActionWithDevice = async () => {
   return action;
 };
 
-const formatVNCLink = (link) => {
+
+const formatLink = (link, type) => {
   const domain = link.match(/^(?:https?:\/\/)?(?:www\.)?([^:\/\n\?\=]+)/);
-  const port = link.match(/(?:port=)([0-9]+)/);
-  return domain ? `vnc://${domain[1]}:${port[1]}` : 'none';
+  const port = link.match(/(?:port=|\:)([0-9]+)/);
+  switch (type) {
+    case 'VNC':
+      return domain ? `vnc://${domain[1]}:${port[1]}` : 'none';
+      break;
+    case 'SSH':
+      return domain ? `ssh changeMe@${domain[1]} -p ${port[1]}` : 'none';
+      break;
+  }
 };
 
 const formatExpirationTime = (sec) => {
@@ -93,19 +101,21 @@ const connectToDevice = async (selectedDevice, devices) => {
     : console.error('Device\'s uid not found');
   const { proxy, expirationsec } = await deviceConnect(uid);
   const timeUntilExpire = formatExpirationTime(expirationsec);
+
   let text;
-  switch (selectedDeviceDetails.servicetitle) {
+  const serviceType = selectedDeviceDetails.servicetitle;
+  switch (serviceType) {
     case 'VNC':
       text = `
-      web link: ${proxy},
-      vnc link: ${formatVNCLink(proxy)}
+      web link: ${proxy}
+      vnc link: ${formatLink(proxy, serviceType)}
 
       ${timeUntilExpire}
       `;
       break;
     case 'SSH':
       text = `
-      ssh link: ssh ${proxy}
+      ssh link: ${formatLink(proxy, serviceType)}
 
       ${timeUntilExpire}
       `;
