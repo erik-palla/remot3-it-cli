@@ -1,0 +1,24 @@
+{
+  "name": "remot3-it-cli",
+  "preferGlobal": true,
+  "bin": {
+    "remotecli": "./index.js"
+  },
+  "version": "0.0.1",
+  "description": "Command Line Interface for controlling devices registered in Remot3.it service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Palla <hello@erikpalla.com> (http://erikpalla.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^3.2.2",
+    "remot3-it-api": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0"
+  }
+}

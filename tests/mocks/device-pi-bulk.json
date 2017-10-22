@@ -1,0 +1,17 @@
+{
+  "deviceaddress": "58:AF:DE:3B:15:B1",
+  "expirationsec": "1795",
+  "imageintervalms": "1000",
+  "proxy": "http://remoteitproxy.io:30664",
+  "requested": "8/27/2017T5:43 PM",
+  "status": "http://remoteitproxy.io:30664",
+  "streamscheme": [
+    null
+  ],
+  "streamuri": [
+    null
+  ],
+  "url": [
+    null
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "deviceaddress": "58:AF:DE:3B:15:B1",
+    "devicealias": "pi",
+    "ownerusername": "user@maildomain.com",
+    "devicetype": "E7-6E-5B-7E-0F-F6",
+    "devicestate": "active",
+    "devicelastip": "43.200.189.37",
+    "lastinternalip": "192.168.0.1",
+    "servicetitle": "Bulk Service",
+    "webenabled": "1",
+    "weburi": [
+      null
+    ],
+    "localurl": "as6dddRS==",
+    "webviewerurl": [
+      null
+    ]
+  },
+  {
+    "deviceaddress": "58:AF:DE:3B:15:B1",
+    "devicealias": "SSH-device",
+    "ownerusername": "user@maildomain.com",
+    "devicetype": "E7-6E-5B-7E-0F-F6",
+    "devicestate": "active",
+    "devicelastip": "43.200.189.37",
+    "lastinternalip": "192.168.0.1",
+    "servicetitle": "SSH",
+    "webenabled": "1",
+    "weburi": "/ssh/index.php",
+    "localurl": "as6dddRS==",
+    "webviewerurl": [
+      null
+    ]
+  },
+  {
+    "deviceaddress": "58:AF:DE:3B:15:B1",
+    "devicealias": "VNC-device",
+    "ownerusername": "user@maildomain.com",
+    "devicetype": "E7-6E-5B-7E-0F-F6",
+    "devicestate": "active",
+    "devicelastip": "43.200.189.37",
+    "lastinternalip": "192.168.0.1",
+    "servicetitle": "VNC",
+    "webenabled": "1",
+    "weburi": [
+      null
+    ],
+    "localurl": "as6dddRS==",
+    "webviewerurl": [
+      null
+    ]
+  }
+]
