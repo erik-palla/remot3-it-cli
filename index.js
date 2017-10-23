@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { logUser, deviceListAll, deviceConnect } = require('remot3-it-api');
+const { logUser, deviceListAll, deviceConnect, deviceSend } = require('remot3-it-api');
 const inquirer = require('inquirer');
 
 const authorization = async () => {
@@ -35,6 +35,9 @@ const listAllRegisteredDevices = async () => {
     return {
       names: devices
         .reduce((allDevices, { devicealias, devicestate, servicetitle }) => {
+          if (servicetitle === 'Bulk Service') {
+            return [...allDevices];
+          }
           const deviceRecord = { name: `[${servicetitle}] ${devicealias}`, value: devicealias };
           const deviceStatus = devicestate === 'active'
             ? { disabled: false }
@@ -66,7 +69,13 @@ const askForActionWithDevice = async () => {
     type: 'list',
     name: 'action',
     message: 'Select action',
-    choices: ['Send command', 'Connect to device', new inquirer.Separator(), 'Return back'],
+    choices: [
+      // 'Send command', 
+      'Connect to device',
+      new inquirer.Separator(),
+      'Return back',
+      'Exit'
+    ],
   }];
   const { action } = await inquirer.prompt(forAction);
   return action;
@@ -81,7 +90,7 @@ const formatLink = (link, type) => {
       return domain ? `vnc://${domain[1]}:${port[1]}` : 'none';
       break;
     case 'SSH':
-      return domain ? `ssh changeMe@${domain[1]} -p ${port[1]}` : 'none';
+      return domain ? `ssh -l LOGIN ${domain[1]} -p ${port[1]}` : 'none';
       break;
   }
 };
@@ -92,18 +101,11 @@ const formatExpirationTime = (sec) => {
   return `Expire in ${minutes} minutes ${seconds} seconds`;
 };
 
-const connectToDevice = async (selectedDevice, devices) => {
-  const selectedDeviceDetails = devices && devices
-    .details
-    .find(device => device.devicealias === selectedDevice);
-  const uid = selectedDeviceDetails
-    ? selectedDeviceDetails.deviceaddress
-    : console.error('Device\'s uid not found');
-  const { proxy, expirationsec } = await deviceConnect(uid);
+const connectToDevice = async (deviceAddress, serviceType) => {
+  const { proxy, expirationsec } = await deviceConnect(deviceAddress);
   const timeUntilExpire = formatExpirationTime(expirationsec);
 
   let text;
-  const serviceType = selectedDeviceDetails.servicetitle;
   switch (serviceType) {
     case 'VNC':
       text = `
@@ -130,25 +132,45 @@ const connectToDevice = async (selectedDevice, devices) => {
   console.log(text);
 };
 
-const sendCommandToDevice = async () => {
-
+const sendCommandToDevice = async (deviceAddress) => {
+  const forCommand = {
+    type: 'input',
+    name: 'command',
+    message: 'Specify command'
+  }
+  const { command } = await inquirer.prompt(forCommand);
+  const status = await deviceSend(deviceAddress, command);
+  console.log(status);
 };
-
 
 const workWith = async (devices) => {
   const selectedDevice = devices && await selectDevice(devices.names);
-  const action = await askForActionWithDevice(selectedDevice);
+  const selectedDeviceDetails = devices && devices
+    .details
+    .find(device => device.devicealias === selectedDevice);
+
+  const { deviceaddress, servicetitle } = selectedDeviceDetails;
+  if (!deviceaddress) {
+    console.error('Device\'s uid not found');
+    return;
+  }
+
+  const action = await askForActionWithDevice();
   switch (action) {
+    // case 'Send command':
+    //   sendCommandToDevice(deviceaddress);
+    //   workWith(devices);
+    //   break;
+    case 'Connect to device':
+      await connectToDevice(deviceaddress, servicetitle);
+      workWith(devices);
+      break;
     case 'Return back':
       workWith(devices);
       break;
-    case 'Send command':
-      sendCommandToDevice();
-      break;
-    case 'Connect to device':
-      connectToDevice(selectedDevice, devices);
-      break;
+    case 'Exit':
     default:
+      process.exit(0);
   }
 };
 
