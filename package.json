@@ -1,15 +1,27 @@
 {
   "name": "remot3-it-cli",
-  "preferGlobal": true,
-  "bin": {
-    "remotecli": "./index.js"
-  },
   "version": "0.0.1",
   "description": "Command Line Interface for controlling devices registered in Remot3.it service",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "preferGlobal": true,
+  "bin": {
+    "remotecli": "dist/index.js"
   },
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "NODE_ENV=test && mocha $(find src -name *.test.js) --compilers js:babel-register --require babel-polyfill",
+    "test:w": "npm t -- --watch",
+    "prebuild": "rimraf dist",
+    "build": "babel --out-dir dist --ignore *.test.js src"
+  },
+  "keywords": [
+    "Remot3.it",
+    "Weaved",
+    "CLI"
+  ],
+  "files": [
+    "dist",
+    "readme.md"
+  ],
   "author": "Erik Palla <hello@erikpalla.com> (http://erikpalla.com/)",
   "license": "MIT",
   "dependencies": {
@@ -19,6 +31,29 @@
   "devDependencies": {
     "eslint": "^4.5.0",
     "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-plugin-import": "^2.7.0"
-  }
+    "eslint-plugin-import": "^2.7.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.1",
+    "mocha": "^3.5.0",
+    "rimraf": "^2.6.1"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erik-palla/remot3-it-cli"
+  },
+  "homepage": "https://github.com/erik-palla/remot3-it-cli#readme"
 }

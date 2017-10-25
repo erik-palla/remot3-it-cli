@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const { logUser, deviceListAll, deviceConnect, deviceSend } = require('remot3-it-api');
-const inquirer = require('inquirer');
+import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
+import inquirer from 'inquirer';
 
 const authorization = async () => {
   const forCredentials = [
@@ -180,3 +180,7 @@ const main = async () => {
   workWith(devices);
 };
 main();
+
+module.exports = {
+  authorization
+}
