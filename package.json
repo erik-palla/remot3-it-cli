@@ -8,7 +8,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "test": "NODE_ENV=test && mocha $(find src -name *.test.js) --compilers js:babel-register --require babel-polyfill",
+    "test": "NODE_ENV=test && mocha $(find tests -name *.test.js) --compilers js:babel-register --require babel-polyfill",
     "test:w": "npm t -- --watch",
     "prebuild": "rimraf dist",
     "build": "babel --out-dir dist --ignore *.test.js src"
@@ -29,15 +29,16 @@
     "remot3-it-api": "^1.0.0"
   },
   "devDependencies": {
-    "eslint": "^4.5.0",
-    "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-plugin-import": "^2.7.0",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "babel-register": "^6.26.0",
     "chai": "^4.1.1",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0",
     "mocha": "^3.5.0",
-    "rimraf": "^2.6.1"
+    "rimraf": "^2.6.1",
+    "sinon": "^4.0.2"
   },
   "babel": {
     "presets": [

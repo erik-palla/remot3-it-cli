@@ -2,7 +2,7 @@
 import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
 import inquirer from 'inquirer';
 
-const authorization = async () => {
+export const authorization = async () => {
   const forCredentials = [
     {
       type: 'input',
@@ -180,7 +180,3 @@ const main = async () => {
   workWith(devices);
 };
 main();
-
-module.exports = {
-  authorization
-}
