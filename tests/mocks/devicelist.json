@@ -38,7 +38,7 @@
     "devicealias": "VNC-device",
     "ownerusername": "user@maildomain.com",
     "devicetype": "E7-6E-5B-7E-0F-F6",
-    "devicestate": "active",
+    "devicestate": "inactive",
     "devicelastip": "43.200.189.37",
     "lastinternalip": "192.168.0.1",
     "servicetitle": "VNC",

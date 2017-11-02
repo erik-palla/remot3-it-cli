@@ -2,6 +2,9 @@
 import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
 import inquirer from 'inquirer';
 
+export const ERROR_NO_REGISTERED_DEVICES = 'Remot3.it server contacted, but there are no registered devices';
+export const INFO_DEVICE_INACTIVE = 'Device is inactive';
+
 export const authorization = async () => {
   const forCredentials = [
     {
@@ -24,26 +27,27 @@ export const authorization = async () => {
   }
 };
 
-const listAllRegisteredDevices = async () => {
+export const getNamesFrom = (devices) => !!devices && devices
+  .reduce((allDevices, { devicealias, devicestate, servicetitle }) => {
+    if (servicetitle === 'Bulk Service') {
+      return [...allDevices];
+    }
+    const deviceRecord = { name: `[${servicetitle}] ${devicealias}`, value: devicealias };
+    const deviceStatus = devicestate === 'active'
+      ? { disabled: false }
+      : { disabled: INFO_DEVICE_INACTIVE };
+    return [...allDevices, Object.assign(deviceRecord, deviceStatus)];
+  }, [])
+
+export const listAllRegisteredDevices = async () => {
   try {
     const devices = await deviceListAll();
     if (devices.length === 0) {
-      console.error(
-        'Remot3.it server contacted, but there are no registered devices',
-      );
+      console.error(ERROR_NO_REGISTERED_DEVICES);
+      return;
     }
     return {
-      names: devices
-        .reduce((allDevices, { devicealias, devicestate, servicetitle }) => {
-          if (servicetitle === 'Bulk Service') {
-            return [...allDevices];
-          }
-          const deviceRecord = { name: `[${servicetitle}] ${devicealias}`, value: devicealias };
-          const deviceStatus = devicestate === 'active'
-            ? { disabled: false }
-            : { disabled: 'Device is inactive' };
-          return [...allDevices, Object.assign(deviceRecord, deviceStatus)];
-        }, []),
+      names: getNamesFrom(devices),
       details: devices,
     };
   } catch (error) {
@@ -177,6 +181,7 @@ const workWith = async (devices) => {
 const main = async () => {
   await authorization();
   const devices = await listAllRegisteredDevices();
+  if (!devices) return;
   workWith(devices);
 };
 main();
