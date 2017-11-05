@@ -2,8 +2,13 @@
 import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
 import inquirer from 'inquirer';
 
-export const ERROR_NO_REGISTERED_DEVICES = 'Remot3.it server contacted, but there are no registered devices';
-export const INFO_DEVICE_INACTIVE = 'Device is inactive';
+import { formatDeviceNames, formatLink, formatExpirationTime, log } from './utils';
+
+export const ERROR_NO_REGISTERED_DEVICES =
+  'Remot3.it server contacted, but there are no registered devices';
+export const ERROR_MISSING_DEVICE_ADDRESS =
+  'Device address was not specified';
+
 
 export const authorization = async () => {
   const forCredentials = [
@@ -23,39 +28,27 @@ export const authorization = async () => {
   try {
     await logUser(username, password);
   } catch (error) {
-    console.error(error);
+    log.error(error);
   }
 };
-
-export const getNamesFrom = (devices) => !!devices && devices
-  .reduce((allDevices, { devicealias, devicestate, servicetitle }) => {
-    if (servicetitle === 'Bulk Service') {
-      return [...allDevices];
-    }
-    const deviceRecord = { name: `[${servicetitle}] ${devicealias}`, value: devicealias };
-    const deviceStatus = devicestate === 'active'
-      ? { disabled: false }
-      : { disabled: INFO_DEVICE_INACTIVE };
-    return [...allDevices, Object.assign(deviceRecord, deviceStatus)];
-  }, [])
 
 export const listAllRegisteredDevices = async () => {
   try {
     const devices = await deviceListAll();
     if (devices.length === 0) {
-      console.error(ERROR_NO_REGISTERED_DEVICES);
+      log.error(ERROR_NO_REGISTERED_DEVICES);
       return;
     }
     return {
-      names: getNamesFrom(devices),
+      names: formatDeviceNames(devices),
       details: devices,
     };
   } catch (error) {
-    console.error(error);
+    log.error(error);
   }
 };
 
-const selectDevice = async (deviceNames) => {
+export const selectDevice = async (deviceNames) => {
   const forDevice = [
     {
       type: 'list',
@@ -68,7 +61,7 @@ const selectDevice = async (deviceNames) => {
   return device;
 };
 
-const askForActionWithDevice = async () => {
+export const askForActionWithDevice = async () => {
   const forAction = [{
     type: 'list',
     name: 'action',
@@ -85,103 +78,104 @@ const askForActionWithDevice = async () => {
   return action;
 };
 
+export const connectToDevice = async (deviceAddress, serviceType = null) => {
+  if (!deviceAddress) {
+    log.error(ERROR_MISSING_DEVICE_ADDRESS);
+    return;
+  }
 
-const formatLink = (link, type) => {
-  const domain = link.match(/^(?:https?:\/\/)?(?:www\.)?([^:\/\n\?\=]+)/);
-  const port = link.match(/(?:port=|\:)([0-9]+)/);
-  switch (type) {
-    case 'VNC':
-      return domain ? `vnc://${domain[1]}:${port[1]}` : 'none';
-      break;
-    case 'SSH':
-      return domain ? `ssh -l LOGIN ${domain[1]} -p ${port[1]}` : 'none';
-      break;
+  try {
+    const { proxy, expirationsec } = await deviceConnect(deviceAddress);
+    const timeUntilExpire = formatExpirationTime(expirationsec);
+
+    let text;
+    switch (serviceType) {
+      case 'VNC':
+        text = `
+        web link: ${proxy}
+        vnc link: ${formatLink(proxy, serviceType)}
+  
+        ${timeUntilExpire}
+        `;
+        break;
+      case 'SSH':
+        text = `
+        ssh link: ${formatLink(proxy, serviceType)}
+  
+        ${timeUntilExpire}
+        `;
+        break;
+      default:
+        text = `
+        link: ${proxy}
+        
+        ${timeUntilExpire}
+        `;
+    }
+    log.info(text);
+  } catch (error) {
+    log.error(error);
   }
 };
 
-const formatExpirationTime = (sec) => {
-  const minutes = Math.floor(sec / 60);
-  const seconds = sec - (minutes * 60);
-  return `Expire in ${minutes} minutes ${seconds} seconds`;
-};
-
-const connectToDevice = async (deviceAddress, serviceType) => {
-  const { proxy, expirationsec } = await deviceConnect(deviceAddress);
-  const timeUntilExpire = formatExpirationTime(expirationsec);
-
-  let text;
-  switch (serviceType) {
-    case 'VNC':
-      text = `
-      web link: ${proxy}
-      vnc link: ${formatLink(proxy, serviceType)}
-
-      ${timeUntilExpire}
-      `;
-      break;
-    case 'SSH':
-      text = `
-      ssh link: ${formatLink(proxy, serviceType)}
-
-      ${timeUntilExpire}
-      `;
-      break;
-    default:
-      text = `
-      link: ${proxy}
-      
-      ${timeUntilExpire}
-      `;
+export const sendCommandToDevice = async (deviceAddress) => {
+  if (!deviceAddress) {
+    log.error(ERROR_MISSING_DEVICE_ADDRESS);
+    return;
   }
-  console.log(text);
-};
-
-const sendCommandToDevice = async (deviceAddress) => {
   const forCommand = {
     type: 'input',
     name: 'command',
     message: 'Specify command'
   }
   const { command } = await inquirer.prompt(forCommand);
-  const status = await deviceSend(deviceAddress, command);
-  console.log(status);
+  try {
+    const status = await deviceSend(deviceAddress, command);
+    log.info(status);
+  } catch (error) {
+    log.error(error);
+  }
 };
 
-const workWith = async (devices) => {
-  const selectedDevice = devices && await selectDevice(devices.names);
-  const selectedDeviceDetails = devices && devices
-    .details
-    .find(device => device.devicealias === selectedDevice);
+const workWithDevices = async (devices) => {
+  try {
+    const selectedDevice = devices && await selectDevice(devices.names);
+    const { deviceaddress, servicetitle } = devices && devices
+      .details
+      .find(device => device.devicealias === selectedDevice);
 
-  const { deviceaddress, servicetitle } = selectedDeviceDetails;
-  if (!deviceaddress) {
-    console.error('Device\'s uid not found');
-    return;
+    if (!deviceaddress) {
+      log.error(ERROR_MISSING_DEVICE_ADDRESS);
+      return;
+    }
+
+    const action = await askForActionWithDevice();
+    switch (action) {
+      // case 'Send command':
+      //   sendCommandToDevice(deviceaddress);
+      //   workWithDevices(devices);
+      //   break;
+      case 'Connect to device':
+        await connectToDevice(deviceaddress, servicetitle);
+        workWithDevices(devices);
+        break;
+      case 'Return back':
+        workWithDevices(devices);
+        break;
+      case 'Exit':
+      default:
+        process.exit(0);
+    }
+  } catch (error) {
+    log.error(error);
   }
 
-  const action = await askForActionWithDevice();
-  switch (action) {
-    // case 'Send command':
-    //   sendCommandToDevice(deviceaddress);
-    //   workWith(devices);
-    //   break;
-    case 'Connect to device':
-      await connectToDevice(deviceaddress, servicetitle);
-      workWith(devices);
-      break;
-    case 'Return back':
-      workWith(devices);
-      break;
-    case 'Exit':
-    default:
-      process.exit(0);
-  }
 };
 
 const main = async () => {
   await authorization();
   const devices = await listAllRegisteredDevices();
   if (!devices) return;
-  workWith(devices);
+  workWithDevices(devices);
 };
 main();
