@@ -1,30 +1,20 @@
 #!/usr/bin/env node
 import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
-import inquirer from 'inquirer';
-
 import { formatDeviceNames, formatLink, formatExpirationTime, log } from './utils';
+import {
+  askForActionWithDevice,
+  askForDeviceSelection,
+  askForCredentials,
+  askForCommand
+} from './prompts';
 
 export const ERROR_NO_REGISTERED_DEVICES =
   'Remot3.it server contacted, but there are no registered devices';
 export const ERROR_MISSING_DEVICE_ADDRESS =
   'Device address was not specified';
 
-
 export const authorization = async () => {
-  const forCredentials = [
-    {
-      type: 'input',
-      message: 'Enter a username',
-      name: 'username',
-    },
-    {
-      type: 'password',
-      message: 'Enter password',
-      name: 'password',
-      mask: '*',
-    },
-  ];
-  const { username, password } = await inquirer.prompt(forCredentials);
+  const { username, password } = await askForCredentials();
   try {
     await logUser(username, password);
   } catch (error) {
@@ -46,36 +36,6 @@ export const listAllRegisteredDevices = async () => {
   } catch (error) {
     log.error(error);
   }
-};
-
-export const selectDevice = async (deviceNames) => {
-  const forDevice = [
-    {
-      type: 'list',
-      name: 'device',
-      message: 'Select device',
-      choices: deviceNames,
-    },
-  ];
-  const { device } = await inquirer.prompt(forDevice);
-  return device;
-};
-
-export const askForActionWithDevice = async () => {
-  const forAction = [{
-    type: 'list',
-    name: 'action',
-    message: 'Select action',
-    choices: [
-      // 'Send command', 
-      'Connect to device',
-      new inquirer.Separator(),
-      'Return back',
-      'Exit'
-    ],
-  }];
-  const { action } = await inquirer.prompt(forAction);
-  return action;
 };
 
 export const connectToDevice = async (deviceAddress, serviceType = null) => {
@@ -123,12 +83,7 @@ export const sendCommandToDevice = async (deviceAddress) => {
     log.error(ERROR_MISSING_DEVICE_ADDRESS);
     return;
   }
-  const forCommand = {
-    type: 'input',
-    name: 'command',
-    message: 'Specify command'
-  }
-  const { command } = await inquirer.prompt(forCommand);
+  const command = await askForCommand();
   try {
     const status = await deviceSend(deviceAddress, command);
     log.info(status);
@@ -137,9 +92,13 @@ export const sendCommandToDevice = async (deviceAddress) => {
   }
 };
 
-const workWithDevices = async (devices) => {
+export const workWithDevices = async (devices) => {
+  if (!devices) {
+    log.error(ERROR_NO_REGISTERED_DEVICES);
+    return;
+  }
   try {
-    const selectedDevice = devices && await selectDevice(devices.names);
+    const selectedDevice = await askForDeviceSelection(devices.names);
     const { deviceaddress, servicetitle } = devices && devices
       .details
       .find(device => device.devicealias === selectedDevice);
@@ -175,7 +134,6 @@ const workWithDevices = async (devices) => {
 const main = async () => {
   await authorization();
   const devices = await listAllRegisteredDevices();
-  if (!devices) return;
   workWithDevices(devices);
 };
 main();

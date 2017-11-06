@@ -1,11 +1,10 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-
-import inquirer from 'inquirer';
 import * as api from 'remot3-it-api';
 
 import * as src from '../src/index';
-import * as utils from '../src/utils'
+import * as utils from '../src/utils';
+import * as prompts from '../src/prompts';
 import deviceListJson from './mocks/devicelist.json';
 
 describe('CLI  ', () => {
@@ -16,9 +15,8 @@ describe('CLI  ', () => {
     let logUser;
     beforeEach(() => {
       prompt = sinon
-        .stub(inquirer, 'prompt')
+        .stub(prompts, 'askForCredentials')
         .resolves({ username, password });
-
       logUser = sinon
         .stub(api, 'logUser')
         .resolves();
@@ -71,51 +69,6 @@ describe('CLI  ', () => {
       listDevices.resolves(deviceListJson);
       const devices = await src.listAllRegisteredDevices();
       expect(devices.details).to.deep.equal(deviceListJson);
-    });
-  });
-  describe('selectDevice', () => {
-    const device = 'some device';
-    const deviceNames = [
-      { name: '[SSH] SSH-device', value: 'SSH-device', disabled: false }
-    ];
-
-    let selectDevicePrompt;
-    beforeEach(() => {
-      selectDevicePrompt = sinon
-        .stub(inquirer, 'prompt')
-        .resolves({ device });
-    });
-    afterEach(() => {
-      selectDevicePrompt.restore();
-    });
-    it('should be called with device names', async () => {
-      await src.selectDevice(deviceNames);
-      expect(selectDevicePrompt.getCall(0).args[0][0].choices).to.deep.equal(deviceNames);
-    });
-    it('should return selected device', async () => {
-      const selectedDevice = await src.selectDevice(deviceNames);
-      expect(selectedDevice).to.be.equal(device);
-    });
-  });
-  describe('askForActionWithDevice', () => {
-    const action = 'some action';
-
-    let askForActionPrompt;
-    beforeEach(() => {
-      askForActionPrompt = sinon
-        .stub(inquirer, 'prompt')
-        .resolves({ action });
-    });
-    afterEach(() => {
-      askForActionPrompt.restore();
-    });
-    it('should call prompt for action', async () => {
-      await src.askForActionWithDevice();
-      expect(askForActionPrompt.calledOnce).to.be.true;
-    });
-    it('should return selected action', async () => {
-      const selectedAction = await src.askForActionWithDevice();
-      expect(selectedAction).to.be.equal(action);
     });
   });
   describe('connectToDevice', () => {
@@ -189,13 +142,13 @@ describe('CLI  ', () => {
     const deviceAddress = '58:AF:DE:3B:15:B1';
     const status = 'some status';
 
-    let askForCommandPrompt;
+    let prompt;
     let sendCommand;
     let logText;
     beforeEach(() => {
-      askForCommandPrompt = sinon
-        .stub(inquirer, 'prompt')
-        .resolves({ command });
+      prompt = sinon
+        .stub(prompts, 'askForCommand')
+        .resolves(command);
       sendCommand = sinon
         .stub(api, 'deviceSend')
         .resolves(status);
@@ -203,7 +156,7 @@ describe('CLI  ', () => {
         .stub(utils.log, 'info');
     });
     afterEach(() => {
-      askForCommandPrompt.restore();
+      prompt.restore();
       sendCommand.restore();
       logText.restore();
     });
@@ -215,7 +168,7 @@ describe('CLI  ', () => {
     });
     it('should call prompt for command', async () => {
       await src.sendCommandToDevice(deviceAddress);
-      expect(askForCommandPrompt.calledOnce).to.be.true;
+      expect(prompt.calledOnce).to.be.true;
     });
     it('should send command to API', async () => {
       await src.sendCommandToDevice(deviceAddress);
@@ -227,9 +180,41 @@ describe('CLI  ', () => {
     });
   });
   describe('workWithDevices', () => {
+    it('should return notification if there is no device', () => {
+      // TODO: finish test
+    });
+    it('should call prompt for device selection', () => {
+      // TODO: finish test
+    });
+    it('should return notification if selected device have no address', () => {
+      // TODO: finish test
+    });
+    it('should call askForActionWithDevice function', () => {
+      // TODO: finish test
+    });
+    it('should call connectToDevice function if action "Connect to device" selected', () => {
+      // TODO: finish test
+    });
+    it('should call workWithDevices function if action "Connect to device" selected', () => {
+      // TODO: finish test
+    });
+    it('should call workWithDevices function if action "Return back" selected', () => {
+      // TODO: finish test
+    });
+    it('should call process exit function if action "Exit" called', () => {
+      // TODO: finish test    
+    });
   });
   describe('main', () => {
-
+    it('should ask for autorization', () => {
+      // TODO: finish test
+    });
+    it('should ask for registered devices', () => {
+      // TODO: finish test
+    });
+    it('should further work with registered devices', () => {
+      // TODO: finish test
+    });
   });
 });
 
