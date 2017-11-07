@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { logUser, deviceListAll, deviceConnect, deviceSend } from 'remot3-it-api';
-import { formatDeviceNames, formatLink, formatExpirationTime, log } from './utils';
+import {
+  formatDeviceNames,
+  formatLink,
+  formatExpirationTime,
+  log,
+  terminateApp
+} from './utils';
 import {
   askForActionWithDevice,
   askForDeviceSelection,
@@ -102,12 +108,10 @@ export const workWithDevices = async (devices) => {
     const { deviceaddress, servicetitle } = devices && devices
       .details
       .find(device => device.devicealias === selectedDevice);
-
     if (!deviceaddress) {
       log.error(ERROR_MISSING_DEVICE_ADDRESS);
       return;
     }
-
     const action = await askForActionWithDevice();
     switch (action) {
       // case 'Send command':
@@ -123,7 +127,7 @@ export const workWithDevices = async (devices) => {
         break;
       case 'Exit':
       default:
-        process.exit(0);
+        terminateApp();
     }
   } catch (error) {
     log.error(error);

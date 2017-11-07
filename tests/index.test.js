@@ -180,17 +180,55 @@ describe('CLI  ', () => {
     });
   });
   describe('workWithDevices', () => {
-    it('should return notification if there is no device', () => {
-      // TODO: finish test
+    const deviceList = JSON.parse(JSON.stringify(deviceListJson));
+    const devices = { names: [{ value: 'device name' }], details: deviceList };
+    const device = deviceList[1].devicealias;
+
+    let promptDeviceSelection;
+    let promptActionWithDevice;
+    let terminateApp;
+    beforeEach(() => {
+      promptDeviceSelection = sinon
+        .stub(prompts, 'askForDeviceSelection')
+        .resolves(device);
+      promptActionWithDevice = sinon
+        .stub(prompts, 'askForActionWithDevice')
+      terminateApp = sinon
+        .stub(utils, 'terminateApp');
     });
-    it('should call prompt for device selection', () => {
-      // TODO: finish test
+    afterEach(() => {
+      promptDeviceSelection.restore();
+      promptActionWithDevice.restore();
+      terminateApp.restore();
     });
-    it('should return notification if selected device have no address', () => {
-      // TODO: finish test
+
+    it('should return notification if there is no device', async () => {
+      const logError = sinon.stub(utils.log, 'error');
+      await src.workWithDevices();
+      logError.restore();
+      expect(logError.calledWith(src.ERROR_NO_REGISTERED_DEVICES)).to.be.true;
     });
-    it('should call askForActionWithDevice function', () => {
-      // TODO: finish test
+    it('should call prompt for device selection', async () => {
+      await src.workWithDevices(devices);
+      expect(promptDeviceSelection.calledOnce).to.be.true;
+    });
+    it('should call prompt for device selection with device names', async () => {
+      await src.workWithDevices(devices);
+      expect(promptDeviceSelection.getCall(0).args[0]).to.deep.equal(devices.names);
+    });
+    it('should return notification if selected device have no address', async () => {
+      const alteredDeviceList = JSON.parse(JSON.stringify(deviceListJson));
+      const deviceDetailsWithoutAddress = alteredDeviceList
+        .map(d => Object.assign(d, { deviceaddress: undefined }));
+      const devicesWithoutAddress = { names: [{}], details: deviceDetailsWithoutAddress };
+      const logError = sinon.stub(utils.log, 'error');
+      await src.workWithDevices(devicesWithoutAddress);
+      logError.restore();
+      expect(logError.calledWith(src.ERROR_MISSING_DEVICE_ADDRESS)).to.be.true;
+    });
+    it('should call askForActionWithDevice function', async () => {
+      await src.workWithDevices(devices);
+      expect(promptActionWithDevice.calledOnce).to.be.true;
     });
     it('should call connectToDevice function if action "Connect to device" selected', () => {
       // TODO: finish test
@@ -201,8 +239,10 @@ describe('CLI  ', () => {
     it('should call workWithDevices function if action "Return back" selected', () => {
       // TODO: finish test
     });
-    it('should call process exit function if action "Exit" called', () => {
-      // TODO: finish test    
+    it('should call process exit function if action "Exit" called', async () => {
+      promptActionWithDevice.resolves('Exit');
+      await src.workWithDevices(devices);
+      expect(terminateApp.calledOnce).to.be.true;
     });
   });
   describe('main', () => {

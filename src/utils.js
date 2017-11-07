@@ -39,3 +39,7 @@ export const log = {
     console.error(msg);
   }
 }
+
+export const terminateApp = () => {
+  process.exit(0);
+}
