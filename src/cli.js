@@ -1,3 +1,4 @@
+import ncp from 'copy-paste';
 import {
   logUser,
   deviceListAll,
@@ -60,19 +61,23 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
     const { proxy, expirationsec } = await deviceConnect(deviceAddress);
     const timeUntilExpire = formatExpirationTime(expirationsec);
 
+    const link = proxy && formatLink(proxy, serviceType);
+    link && ncp.copy(link);
+
     let text;
     switch (serviceType) {
       case 'VNC':
         text = `
         web link: ${proxy}
-        vnc link: ${formatLink(proxy, serviceType)}
+        vnc link: ${link} (link was copied to OS clipboard)
   
         ${timeUntilExpire}
         `;
         break;
       case 'SSH':
+
         text = `
-        ssh link: ${formatLink(proxy, serviceType)}
+        ssh link: ${link} (link was copied to OS clipboard)
   
         ${timeUntilExpire}
         `;
