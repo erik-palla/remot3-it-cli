@@ -62,12 +62,13 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
     const { proxy, expirationsec } = await deviceConnect(deviceAddress);
     const timeUntilExpire = formatExpirationTime(expirationsec);
 
-    const link = proxy && changeTextStyle(formatLink(proxy, serviceType), 'bold');
+    const link = proxy && formatLink(proxy, serviceType);
     link && ncp.copy(link);
-
+    const decoratedLink = link && changeTextStyle(link, 'bold');
+ 
     const webProxy = proxy && changeTextStyle(proxy, 'bold');
 
-    const notifyLinkWasCopied = changeTextStyle('(link was copied to OS clipboard)', blue);
+    const notifyLinkWasCopied = changeTextStyle('(link was copied to OS clipboard)', 'blue');
 
     let text;
     switch (serviceType) {

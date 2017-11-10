@@ -17,7 +17,7 @@ export const formatLink = (link, type) => {
   const port = link.match(/(?:port=|\:)([0-9]+)/);
   switch (type) {
     case 'VNC':
-      return domain ? `vnc://${domain[1]}:${port[1]}` : 'none';
+      return domain ? `${domain[1]}:${port[1]}` : 'none';
       break;
     case 'SSH':
       return domain ? `ssh -l LOGIN ${domain[1]} -p ${port[1]}` : 'none';
@@ -44,7 +44,7 @@ const SWATCHES = {
 export const changeTextStyle = (msg, style = 'standard') =>
   `${SWATCHES[style]
     ? SWATCHES[style]
-    : SWATCHES.standard}${style}${SWATCHES.reset}`;
+    : SWATCHES.standard}${msg}${SWATCHES.reset}`;
 
 
 export const log = {
