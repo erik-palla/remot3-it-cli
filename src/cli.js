@@ -11,7 +11,8 @@ import {
   formatLink,
   formatExpirationTime,
   log,
-  terminateApp
+  terminateApp,
+  changeTextStyle
 } from './utils';
 
 import {
@@ -61,15 +62,19 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
     const { proxy, expirationsec } = await deviceConnect(deviceAddress);
     const timeUntilExpire = formatExpirationTime(expirationsec);
 
-    const link = proxy && formatLink(proxy, serviceType);
+    const link = proxy && changeTextStyle(formatLink(proxy, serviceType), 'bold');
     link && ncp.copy(link);
+
+    const webProxy = proxy && changeTextStyle(proxy, 'bold');
+
+    const notifyLinkWasCopied = changeTextStyle('(link was copied to OS clipboard)', blue);
 
     let text;
     switch (serviceType) {
       case 'VNC':
         text = `
-        web link: ${proxy}
-        vnc link: ${link} (link was copied to OS clipboard)
+        web link: ${webProxy}
+        vnc link: ${link} ${notifyLinkWasCopied}
   
         ${timeUntilExpire}
         `;
@@ -77,14 +82,14 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
       case 'SSH':
 
         text = `
-        ssh link: ${link} (link was copied to OS clipboard)
+        ssh link: ${link} ${notifyLinkWasCopied}
   
         ${timeUntilExpire}
         `;
         break;
       default:
         text = `
-        link: ${proxy}
+        link: ${webProxy}
         
         ${timeUntilExpire}
         `;

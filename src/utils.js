@@ -31,12 +31,28 @@ export const formatExpirationTime = (sec) => {
   return `Expire in ${minutes} minutes ${seconds} seconds`;
 };
 
+const SWATCHES = {
+  blue: '\x1b[34m',
+  yellow: '\x1b[33m',
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  standard: ''
+}
+
+export const changeTextStyle = (msg, style = 'standard') =>
+  `${SWATCHES[style]
+    ? SWATCHES[style]
+    : SWATCHES.standard}${style}${SWATCHES.reset}`;
+
+
 export const log = {
   info(msg) {
     console.log(msg);
   },
   error(msg) {
-    console.error(msg);
+    console.error(changeTextStyle(msg, 'red'));
   }
 }
 
