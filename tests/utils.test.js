@@ -49,7 +49,7 @@ describe('UTILS', () => {
     ['SSH', 'VNC'].forEach(type => {
       it(`should format link to correct format for ${type}`, () => {
         const formatedLink = utils.formatLink(link, type);
-        if (type === 'VNC') expect(formatedLink).to.equal('vnc://domain.com:12345');
+        if (type === 'VNC') expect(formatedLink).to.equal('domain.com:12345');
         if (type === 'SSH') expect(formatedLink).to.equal('ssh -l LOGIN domain.com -p 12345');
       });
     })

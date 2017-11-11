@@ -11,8 +11,7 @@
     "test": "NODE_ENV=test && mocha $(find tests -name *.test.js) --compilers js:babel-register --require babel-polyfill",
     "test:w": "npm t -- --watch",
     "prebuild": "rimraf dist",
-    "build": "babel --out-dir dist --ignore *.test.js src",
-    "coverage": "istanbul cover _mocha -- ./tests --compilers js:babel-register "
+    "build": "babel --out-dir dist --ignore *.test.js src"
   },
   "keywords": [
     "Remot3.it",
