@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import * as api from 'remot3-it-api';
+import ncp from 'copy-paste';
 
 import * as cli from '../src/cli';
 import * as utils from '../src/utils';
@@ -82,6 +83,7 @@ describe('CLI  ', () => {
     let formatTime;
     let logText;
     let linkFormat;
+    let copyLink;
     beforeEach(() => {
       connect = sinon
         .stub(api, 'deviceConnect')
@@ -93,12 +95,15 @@ describe('CLI  ', () => {
         .stub(utils.log, 'info');
       linkFormat = sinon
         .stub(utils, 'formatLink');
+      copyLink = sinon
+        .stub(ncp, 'copy');
     });
     afterEach(() => {
       connect.restore();
       formatTime.restore();
       logText.restore();
       linkFormat.restore();
+      copyLink.restore();
     });
     it('should return notification if device address is missing', async () => {
       const logError = sinon
@@ -115,6 +120,13 @@ describe('CLI  ', () => {
       await cli.connectToDevice(deviceAddress);
       expect(formatTime.calledWith(expirationsec)).to.be.true;
     });
+    it('should call function for copying link to OS clipboard', async () => {
+      const link = 'some link';
+      linkFormat.returns(link);
+      await cli.connectToDevice(deviceAddress);
+
+      expect(copyLink.calledWith(link)).to.be.true;
+    })
     for (let type of serviceType) {
       it(`should contain expiration time for type ${type}`,
         async () => {
