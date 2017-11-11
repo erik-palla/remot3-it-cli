@@ -1,5 +1,9 @@
 export const INFO_DEVICE_INACTIVE = 'Device is inactive';
 
+/**
+ * Formats devices names to form suitable for use in inquirer
+ * @param {array} devices - array of devices registered to user account 
+ */
 export const formatDeviceNames = (devices) => !!devices && devices
   .reduce((allDevices, { devicealias, devicestate, servicetitle }) => {
     if (servicetitle === 'Bulk Service') {
@@ -12,6 +16,11 @@ export const formatDeviceNames = (devices) => !!devices && devices
     return [...allDevices, Object.assign(deviceRecord, deviceStatus)];
   }, []);
 
+/**
+ * 
+ * @param {string} link - connection link to selected device
+ * @param {string} type - type of connection, for example - VNC, SSH...
+ */
 export const formatLink = (link, type) => {
   const domain = link.match(/^(?:https?:\/\/)?(?:www\.)?([^:\/\n\?\=]+)/);
   const port = link.match(/(?:port=|\:)([0-9]+)/);
@@ -25,6 +34,10 @@ export const formatLink = (link, type) => {
   }
 };
 
+/**
+ * Formats seconds to connection expiration to more readable format 
+ * @param {number} sec 
+ */
 export const formatExpirationTime = (sec) => {
   const minutes = Math.floor(sec / 60);
   const seconds = sec - (minutes * 60);
@@ -41,6 +54,11 @@ const SWATCHES = {
   standard: ''
 }
 
+/**
+ * Stylize text before passing through
+ * @param {string} msg - message which have to be send to stdout 
+ * @param {string} style - style in which should be message wrapped/shown
+ */
 export const changeTextStyle = (msg, style = 'standard') =>
   `${SWATCHES[style]
     ? SWATCHES[style]

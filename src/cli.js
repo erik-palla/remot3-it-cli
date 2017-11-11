@@ -27,6 +27,10 @@ export const ERROR_NO_REGISTERED_DEVICES =
 export const ERROR_MISSING_DEVICE_ADDRESS =
   'Device address was not specified';
 
+/**
+ * Triggers prompt for credentials collecting, then calls Remot3.it API for setting authorization
+ * header
+ */
 export const authorization = async () => {
   const { username, password } = await askForCredentials();
   try {
@@ -36,6 +40,12 @@ export const authorization = async () => {
   }
 };
 
+/**
+ * Asks Remot3.it API for information on all devices registered to user
+ * @returns {Object} devices - details about devices returned from API
+ * @returns {array} devices.names - names extracted from response and formated for inquirer
+ * @returns {array} device.details - complete response from API
+ */
 export const listAllRegisteredDevices = async () => {
   try {
     const devices = await deviceListAll();
@@ -52,6 +62,11 @@ export const listAllRegisteredDevices = async () => {
   }
 };
 
+/**
+ * Contacts API and ask for details for connection, format depends on type of service
+ * @param {string} deviceAddress - address of selected device 
+ * @param {string} serviceType - type of service for which is asked, for example - VNC 
+ */
 export const connectToDevice = async (deviceAddress, serviceType = null) => {
   if (!deviceAddress) {
     log.error(ERROR_MISSING_DEVICE_ADDRESS);
@@ -65,7 +80,7 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
     const link = proxy && formatLink(proxy, serviceType);
     link && ncp.copy(link);
     const decoratedLink = link && changeTextStyle(link, 'bold');
- 
+
     const webProxy = proxy && changeTextStyle(proxy, 'bold');
 
     const notifyLinkWasCopied = changeTextStyle('(link was copied to OS clipboard)', 'blue');
@@ -101,6 +116,11 @@ export const connectToDevice = async (deviceAddress, serviceType = null) => {
   }
 };
 
+/**
+ * Should send command to selected device. Unfortunatelly this endpoint is not fully described in
+ * API documentation, so it is not fully clear how to use it correctly
+ * @param {string} deviceAddress - address of selected device 
+ */
 export const sendCommandToDevice = async (deviceAddress) => {
   if (!deviceAddress) {
     log.error(ERROR_MISSING_DEVICE_ADDRESS);
@@ -115,6 +135,10 @@ export const sendCommandToDevice = async (deviceAddress) => {
   }
 };
 
+/**
+ * Asks user for device selection and triggers action with devices following user selection
+ * @param {array} devices - list of devices registered to user account 
+ */
 export const workWithDevices = async (devices) => {
   if (!devices) {
     log.error(ERROR_NO_REGISTERED_DEVICES);
