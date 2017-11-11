@@ -1,6 +1,6 @@
 {
   "name": "remot3-it-cli",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Command Line Interface for controlling devices registered in Remot3.it service",
   "preferGlobal": true,
   "bin": {
